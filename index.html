@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#003f7a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* 모바일 화면 가로 넘침 원천 방지 */
+        /* 모바일 화면 가로 넘침 및 날짜 칸 벗어남 원천 방지 */
         html, body { width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; padding: 0; }
         * { box-sizing: border-box; }
         
@@ -26,14 +22,14 @@
         h4 { color: #333; margin-top: 15px; margin-bottom: 5px; }
         label { font-weight: 700; margin-top: 15px; display: block; color: #000; font-size: 15px; }
         
-        /* 모바일 화면에서 날짜를 포함한 모든 입력창이 박스 안에 정확히 들어오도록 제어 */
-        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100%; max-width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
+        /* 모바일에서 날짜 칸을 포함한 모든 입력창이 박스 안쪽에 정확히 안착되도록 강제 제한 */
+        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100% !important; max-width: 100% !important; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
         input:focus, select:focus { border-color: #003f7a; outline: none; }
         
         button { background-color: #003f7a; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #002855; }
         
-        #equipmentDetailGroup { display: none; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px dashed #003f7a; margin-bottom: 12px; }
+        #equipmentDetailGroup { display: none; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px dashed #003f7a; margin-bottom: 12px; width: 100%; }
 
         .amount-unit-group { display: flex; gap: 8px; width: 100%; }
         .amount-unit-group input[type="number"] { flex: 2; margin-bottom: 0; }
@@ -59,14 +55,13 @@
         .admin-section.active { display: block; }
 
         .admin-panel ul { list-style-type: none; padding: 0; margin: 0 0 15px 0; }
-        .admin-panel li { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 12px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-size: 14px; cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .admin-panel li { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 12px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-size: 14px; cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; }
         .admin-panel li:active { cursor: grabbing; }
         .admin-panel li.dragging { opacity: 0.4; background: #dfe4ea; }
         
         .drag-handle { color: #888; font-size: 16px; margin-right: 8px; flex-shrink: 0; }
         .admin-panel li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 삭제 버튼 크기 고정 및 디자인 정돈 */
         .delete-btn { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto !important; height: auto !important; margin: 0 !important; flex-shrink: 0; }
         .delete-btn:hover { background-color: #c82333; }
         .record-delete-btn { position: absolute; top: 12px; right: 12px; }
@@ -186,7 +181,7 @@
             <select id="workType" required onchange="checkEquipmentType()"></select>
 
             <div id="equipmentDetailGroup">
-                <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #FF0000;">장비 종류 상세 입력</label>
+                <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #003f7a;">장비 종류 상세 입력</label>
                 <input type="text" id="equipmentName" placeholder="예: FAN, PUMP, PANEL 등" style="margin-bottom: 0; font-size: 15px;">
             </div>
 
@@ -233,7 +228,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const recordsCol = collection(db, "workRecords");
-        const settingsDocRef = doc(db, "appSettings", "config"); // 층수 및 공종 설정을 저장하는 DB 문서
+        const settingsDocRef = doc(db, "appSettings", "config");
 
         let userName = localStorage.getItem('userName');
         let userPhone = localStorage.getItem('userPhone');
@@ -275,21 +270,18 @@
         let workTypes = DEFAULT_WORK_TYPES;
         let isAdmin = false;
 
-        // 접속 시 현장 당일 날짜(YYYY-MM-DD) 설정
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         document.getElementById('workDate').value = `${year}-${month}-${day}`;
 
-        // 데이터베이스에서 층수 및 공종 설정 불러오기 (실시간 연동)
         onSnapshot(settingsDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 if (data.floors) floors = data.floors;
                 if (data.workTypes) workTypes = data.workTypes;
             } else {
-                // 최초 실행 시 기본값으로 DB에 저장
                 setDoc(settingsDocRef, { floors: DEFAULT_FLOORS, workTypes: DEFAULT_WORK_TYPES });
             }
             renderDropdowns();
@@ -298,7 +290,6 @@
             updateStats();
         });
 
-        // 설정을 데이터베이스에 저장하는 함수
         async function saveSettingsToDB() {
             try {
                 await setDoc(settingsDocRef, { floors: floors, workTypes: workTypes });
@@ -381,7 +372,7 @@
                             const movedItem = workTypes.splice(draggedIndex, 1)[0];
                             workTypes.splice(targetIndex, 0, movedItem);
                         }
-                        saveSettingsToDB(); // DB에 순서 변경 즉시 반영
+                        saveSettingsToDB();
                         renderDropdowns();
                         renderAdminLists();
                         updateStatsCriteriaOptions();
