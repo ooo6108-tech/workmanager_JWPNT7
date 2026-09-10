@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003f7a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,11 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* 모바일 화면 크기 맞춤 및 박스 모델 강제 고정 */
-        html, body { width: 100%; overflow-x: hidden; margin: 0; padding: 0; }
+        /* 모바일 화면 가로 넘침 원천 방지 */
+        html, body { width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; padding: 0; }
         * { box-sizing: border-box; }
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; display: flex; justify-content: center; padding: 8px; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; display: flex; justify-content: center; padding: 10px; }
         .app-container { background-color: white; width: 100%; max-width: 550px; padding: 15px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-top: 6px solid #003f7a; position: relative; }
         
         .header-titles { text-align: center; margin-bottom: 20px; }
@@ -22,8 +26,8 @@
         h4 { color: #333; margin-top: 15px; margin-bottom: 5px; }
         label { font-weight: 700; margin-top: 15px; display: block; color: #000; font-size: 15px; }
         
-        /* 모바일 화면에서 입력창들이 컨테이너 밖으로 벗어나지 않도록 강제 제한 */
-        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100% !important; max-width: 100% !important; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
+        /* 모바일 화면에서 날짜를 포함한 모든 입력창이 박스 안에 정확히 들어오도록 제어 */
+        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100%; max-width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
         input:focus, select:focus { border-color: #003f7a; outline: none; }
         
         button { background-color: #003f7a; color: white; border: none; cursor: pointer; }
@@ -59,21 +63,23 @@
         .admin-panel li:active { cursor: grabbing; }
         .admin-panel li.dragging { opacity: 0.4; background: #dfe4ea; }
         
-        .drag-handle { color: #888; font-size: 16px; margin-right: 8px; }
+        .drag-handle { color: #888; font-size: 16px; margin-right: 8px; flex-shrink: 0; }
+        .admin-panel li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .admin-panel .inline-group { display: flex; gap: 6px; }
-        .admin-panel .inline-group input { margin-bottom: 0; padding: 8px; font-size: 14px; }
-        .admin-panel .inline-group button { margin-bottom: 0; width: 60px; padding: 8px; font-size: 14px; }
+        /* 삭제 버튼 크기 고정 및 디자인 정돈 */
+        .delete-btn { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto !important; height: auto !important; margin: 0 !important; flex-shrink: 0; }
+        .delete-btn:hover { background-color: #c82333; }
+        .record-delete-btn { position: absolute; top: 12px; right: 12px; }
+
+        .admin-panel .inline-group { display: flex; gap: 6px; width: 100%; }
+        .admin-panel .inline-group input { margin-bottom: 0; padding: 8px; font-size: 14px; flex: 1; }
+        .admin-panel .inline-group button { margin-bottom: 0; width: 60px !important; padding: 8px; font-size: 14px; flex-shrink: 0; }
         .save-item-btn { background-color: #28a745; }
         .cancel-item-btn { background-color: #6c757d; }
         
         .stats-box { background: white; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
         .stats-result { margin-top: 8px; max-height: 180px; overflow-y: auto; font-size: 14px; }
         .stats-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold; }
-
-        .delete-btn { background-color: #dc3545; color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto; margin: 0; }
-        .delete-btn:hover { background-color: #c82333; }
-        .record-delete-btn { position: absolute; top: 12px; right: 12px; }
 
         #userModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
         .modal-content { background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #003f7a; }
@@ -180,7 +186,7 @@
             <select id="workType" required onchange="checkEquipmentType()"></select>
 
             <div id="equipmentDetailGroup">
-                <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #003f7a;">장비 종류 상세 입력</label>
+                <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #FF0000;">장비 종류 상세 입력</label>
                 <input type="text" id="equipmentName" placeholder="예: FAN, PUMP, PANEL 등" style="margin-bottom: 0; font-size: 15px;">
             </div>
 
@@ -212,7 +218,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCMQBeNwlGOn4CaVAl643S7qtKL2I6I9jw",
@@ -227,6 +233,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const recordsCol = collection(db, "workRecords");
+        const settingsDocRef = doc(db, "appSettings", "config"); // 층수 및 공종 설정을 저장하는 DB 문서
 
         let userName = localStorage.getItem('userName');
         let userPhone = localStorage.getItem('userPhone');
@@ -263,16 +270,42 @@
 
         const DEFAULT_FLOORS = ["지하 2층", "지하 1층", "지상 1층", "지상 2층", "지상 3층", "지상 4층", "지상 5층"];
         const DEFAULT_WORK_TYPES = ["철근배근", "슬리브 및 매립배관", "거푸집 조립", "콘크리트 타설", "장비 설치", "기타"];
-        let floors = JSON.parse(localStorage.getItem('settingFloors')) || DEFAULT_FLOORS;
-        let workTypes = JSON.parse(localStorage.getItem('settingWorkTypes')) || DEFAULT_WORK_TYPES;
+        
+        let floors = DEFAULT_FLOORS;
+        let workTypes = DEFAULT_WORK_TYPES;
         let isAdmin = false;
 
-        // 접속 시 현장 당일 날짜(YYYY-MM-DD)를 정확하게 기본 설정
+        // 접속 시 현장 당일 날짜(YYYY-MM-DD) 설정
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         document.getElementById('workDate').value = `${year}-${month}-${day}`;
+
+        // 데이터베이스에서 층수 및 공종 설정 불러오기 (실시간 연동)
+        onSnapshot(settingsDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.floors) floors = data.floors;
+                if (data.workTypes) workTypes = data.workTypes;
+            } else {
+                // 최초 실행 시 기본값으로 DB에 저장
+                setDoc(settingsDocRef, { floors: DEFAULT_FLOORS, workTypes: DEFAULT_WORK_TYPES });
+            }
+            renderDropdowns();
+            if (isAdmin) renderAdminLists();
+            updateStatsCriteriaOptions();
+            updateStats();
+        });
+
+        // 설정을 데이터베이스에 저장하는 함수
+        async function saveSettingsToDB() {
+            try {
+                await setDoc(settingsDocRef, { floors: floors, workTypes: workTypes });
+            } catch (e) {
+                console.error("설정 저장 오류:", e);
+            }
+        }
 
         window.renderDropdowns = function() {
             document.getElementById('workFloor').innerHTML = '<option value="">층수를 선택하세요</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
@@ -344,12 +377,11 @@
                         if (listType === 'floor') {
                             const movedItem = floors.splice(draggedIndex, 1)[0];
                             floors.splice(targetIndex, 0, movedItem);
-                            localStorage.setItem('settingFloors', JSON.stringify(floors));
                         } else if (listType === 'workType') {
                             const movedItem = workTypes.splice(draggedIndex, 1)[0];
                             workTypes.splice(targetIndex, 0, movedItem);
-                            localStorage.setItem('settingWorkTypes', JSON.stringify(workTypes));
                         }
+                        saveSettingsToDB(); // DB에 순서 변경 즉시 반영
                         renderDropdowns();
                         renderAdminLists();
                         updateStatsCriteriaOptions();
@@ -365,6 +397,7 @@
                     isAdmin = true;
                     document.body.classList.add('admin-active');
                     document.getElementById('adminToggleBtn').innerText = "관리자 모드 끄기";
+                    renderAdminLists();
                     updateStatsCriteriaOptions();
                     updateStats();
                 } else { alert("비밀번호가 틀렸습니다."); }
@@ -389,6 +422,7 @@
             } else {
                 document.getElementById('tabBtn2').classList.add('active');
                 document.getElementById('adminSection2').classList.add('active');
+                renderAdminLists();
             }
         };
 
@@ -425,7 +459,7 @@
             if (floors.includes(val)) { alert("이미 존재하는 층수입니다."); return; }
             if (confirm(`'${val}' 층수를 추가하시겠습니까?`)) {
                 floors.push(val);
-                localStorage.setItem('settingFloors', JSON.stringify(floors));
+                saveSettingsToDB();
                 input.value = '';
                 renderDropdowns();
                 renderAdminLists();
@@ -440,7 +474,7 @@
         window.deleteFloor = function(index) {
             if(confirm('이 층수를 삭제하시겠습니까?')) { 
                 floors.splice(index, 1); 
-                localStorage.setItem('settingFloors', JSON.stringify(floors)); 
+                saveSettingsToDB();
                 renderDropdowns(); 
                 renderAdminLists(); 
                 updateStatsCriteriaOptions();
@@ -455,7 +489,7 @@
             if (workTypes.includes(val)) { alert("이미 존재하는 공종입니다."); return; }
             if (confirm(`'${val}' 공종을 추가하시겠습니까?`)) {
                 workTypes.push(val);
-                localStorage.setItem('settingWorkTypes', JSON.stringify(workTypes));
+                saveSettingsToDB();
                 input.value = '';
                 renderDropdowns();
                 renderAdminLists();
@@ -470,7 +504,7 @@
         window.deleteWorkType = function(index) {
             if(confirm('이 공종을 삭제하시겠습니까?')) { 
                 workTypes.splice(index, 1); 
-                localStorage.setItem('settingWorkTypes', JSON.stringify(workTypes)); 
+                saveSettingsToDB();
                 renderDropdowns(); 
                 renderAdminLists(); 
                 updateStatsCriteriaOptions();
@@ -694,9 +728,6 @@
             XLSX.utils.book_append_sheet(workbook, worksheet, "청주_PT7_4공구_물량");
             XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(최종완성).xlsx");
         };
-
-        renderDropdowns();
-        renderAdminLists();
     </script>
 </body>
 </html>
