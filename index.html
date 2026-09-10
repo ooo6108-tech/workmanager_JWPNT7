@@ -2,57 +2,77 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>청주 P&T7 4공구 - 작업물량 관리</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .app-container { background-color: white; width: 100%; max-width: 550px; padding: 25px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-top: 6px solid #003f7a; position: relative; }
-        .header-titles { text-align: center; margin-bottom: 25px; }
-        .header-titles h1 { color: #003f7a; font-size: 22px; font-weight: 900; margin: 0 0 5px 0; }
-        .header-titles h2 { color: #333; font-size: 18px; font-weight: 700; margin: 0 0 15px 0; }
-        .header-titles h3 { color: #666; font-size: 15px; font-weight: 400; margin: 0; background: #f0f0f0; display: inline-block; padding: 5px 15px; border-radius: 20px; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .app-container { background-color: white; width: 100%; max-width: 550px; padding: 20px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-top: 6px solid #003f7a; position: relative; overflow: hidden; }
+        
+        .header-titles { text-align: center; margin-bottom: 20px; }
+        .header-titles h1 { color: #003f7a; font-size: 20px; font-weight: 900; margin: 0 0 5px 0; }
+        .header-titles h2 { color: #333; font-size: 16px; font-weight: 700; margin: 0 0 10px 0; }
+        .header-titles h3 { color: #666; font-size: 14px; font-weight: 400; margin: 0; background: #f0f0f0; display: inline-block; padding: 4px 12px; border-radius: 20px; }
+        
         h4 { color: #333; margin-top: 15px; margin-bottom: 5px; }
-        label { font-weight: 700; margin-top: 15px; display: block; color: #000; font-size: 16px; }
-        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100%; padding: 15px; margin-top: 8px; margin-bottom: 15px; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 18px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; }
+        label { font-weight: 700; margin-top: 15px; display: block; color: #000; font-size: 15px; }
+        
+        input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100%; max-width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
         input:focus, select:focus { border-color: #003f7a; outline: none; }
-        button { background-color: #003f7a; color: white; border: none; cursor: pointer; font-size: 18px; }
+        
+        button { background-color: #003f7a; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #002855; }
         
-        .excel-btn { background-color: #1a73e8; margin-bottom: 20px; }
+        #equipmentDetailGroup { display: none; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px dashed #003f7a; margin-bottom: 12px; }
+
+        .amount-unit-group { display: flex; gap: 8px; }
+        .amount-unit-group input[type="number"] { flex: 2; margin-bottom: 0; }
+        .amount-unit-group select { flex: 1; margin-bottom: 0; }
+
+        .excel-btn { background-color: #1a73e8; margin-top: 15px; margin-bottom: 15px; }
         .excel-btn:hover { background-color: #135aba; }
         
-        .record-item { background-color: #ffffff; border-left: 6px solid #003f7a; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .record-date { font-size: 14px; color: #555; }
-        .record-details { font-size: 18px; font-weight: 900; color: #111; margin-top: 8px; }
-        .record-photo { max-width: 100%; height: auto; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
+        .record-item { background-color: #ffffff; border-left: 6px solid #003f7a; padding: 12px; margin-bottom: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; word-break: break-all; }
+        .record-date { font-size: 13px; color: #555; }
+        .record-details { font-size: 16px; font-weight: 900; color: #111; margin-top: 6px; }
+        .record-author { font-size: 13px; color: #003f7a; margin-top: 6px; font-weight: bold; background: #eef2f5; padding: 4px 8px; display: inline-block; border-radius: 4px; }
+        .record-photo { max-width: 100%; height: auto; margin-top: 8px; border-radius: 6px; border: 1px solid #ddd; }
         
-        .admin-toggle-btn { background-color: #6c757d; margin-bottom: 20px; font-size: 16px; padding: 10px; }
+        .admin-toggle-btn { background-color: #6c757d; margin-bottom: 15px; font-size: 15px; padding: 10px; }
         
-        .admin-panel { display: none; background-color: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px dashed #6c757d; }
-        .admin-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .admin-tab-btn { flex: 1; padding: 10px; font-size: 15px; background-color: #adb5bd; margin-bottom: 0; }
+        .admin-panel { display: none; background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px dashed #6c757d; }
+        .admin-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .admin-tab-btn { flex: 1; padding: 8px; font-size: 14px; background-color: #adb5bd; margin-bottom: 0; }
         .admin-tab-btn.active { background-color: #003f7a; }
         
         .admin-section { display: none; }
         .admin-section.active { display: block; }
 
         .admin-panel ul { list-style-type: none; padding: 0; margin: 0 0 15px 0; }
-        .admin-panel li { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; }
-        .admin-panel .inline-group { display: flex; gap: 8px; }
-        .admin-panel .inline-group input { margin-bottom: 0; padding: 10px; font-size: 16px; }
-        .admin-panel .inline-group button { margin-bottom: 0; width: 70px; padding: 10px; font-size: 16px; }
+        .admin-panel li { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 12px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-size: 14px; cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .admin-panel li:active { cursor: grabbing; }
+        .admin-panel li.dragging { opacity: 0.4; background: #dfe4ea; }
+        
+        .drag-handle { color: #888; font-size: 16px; margin-right: 8px; }
+
+        .admin-panel .inline-group { display: flex; gap: 6px; }
+        .admin-panel .inline-group input { margin-bottom: 0; padding: 8px; font-size: 14px; }
+        .admin-panel .inline-group button { margin-bottom: 0; width: 60px; padding: 8px; font-size: 14px; }
         .save-item-btn { background-color: #28a745; }
         .cancel-item-btn { background-color: #6c757d; }
         
-        .stats-box { background: white; padding: 15px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
-        .stats-result { margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 15px; }
+        .stats-box { background: white; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
+        .stats-result { margin-top: 8px; max-height: 180px; overflow-y: auto; font-size: 14px; }
         .stats-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold; }
 
-        .delete-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; width: auto; margin: 0; }
+        .delete-btn { background-color: #dc3545; color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto; margin: 0; }
         .delete-btn:hover { background-color: #c82333; }
-        .record-delete-btn { position: absolute; top: 15px; right: 15px; }
+        .record-delete-btn { position: absolute; top: 12px; right: 12px; }
+
+        #userModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #003f7a; }
 
         body.admin-active .admin-panel { display: block; }
         body.admin-active .admin-toggle-btn { background-color: #dc3545; }
@@ -61,6 +81,21 @@
     </style>
 </head>
 <body>
+
+    <!-- 최초 1회 사용자 정보 입력 팝업 -->
+    <div id="userModal" style="display:none;">
+        <div class="modal-content">
+            <h3 style="color: #003f7a; margin-top: 0; text-align: center;">👋 사용자 정보 입력</h3>
+            <p style="font-size: 14px; color: #555; text-align: center; margin-bottom: 20px;">
+                작업 물량 등록을 위해 <strong>최초 1회만</strong> 성함과 연락처를 입력해 주세요.<br>(이후에는 입력하지 않습니다.)
+            </p>
+            <label for="modalName">성함</label>
+            <input type="text" id="modalName" placeholder="예: 홍길동" required>
+            <label for="modalPhone">연락처 (전화번호)</label>
+            <input type="text" id="modalPhone" placeholder="예: 010-1234-5678" required>
+            <button type="button" onclick="saveUserInfo()" style="margin-top: 10px; padding: 14px; font-size: 16px;">저장하고 시작하기</button>
+        </div>
+    </div>
 
     <div class="app-container">
         <div class="header-titles">
@@ -78,30 +113,35 @@
                 <button type="button" class="admin-tab-btn" id="tabBtn2" onclick="switchAdminTab(2)">⚙️ 항목 편집</button>
             </div>
 
-            <!-- 탭 1: 물량 확인 -->
+            <!-- 탭 1: 물량 확인 (통계 및 상세 필터 추가) -->
             <div class="admin-section active" id="adminSection1">
                 <h4>물량 통계 조회</h4>
-                <label for="statCriteria" style="font-size: 14px; margin-top: 5px;">조회 기준</label>
-                <select id="statCriteria" onchange="updateStats()" style="padding: 10px; font-size: 15px; margin-bottom: 10px;">
+                <label for="statCriteria" style="font-size: 13px; margin-top: 4px;">조회 기준</label>
+                <select id="statCriteria" onchange="onCriteriaChange()" style="padding: 8px; font-size: 14px; margin-bottom: 8px;">
                     <option value="floor">층별 보기</option>
                     <option value="type">공종별 보기</option>
                     <option value="date">날짜별 보기</option>
                     <option value="month">월별 보기</option>
                 </select>
+
+                <label for="statSubFilter" style="font-size: 13px; margin-top: 4px;">세부 항목 선택</label>
+                <select id="statSubFilter" onchange="updateStats()" style="padding: 8px; font-size: 14px; margin-bottom: 8px;">
+                    <option value="ALL">전체 보기 (전체 합산)</option>
+                </select>
                 
                 <div class="stats-box">
-                    <div style="font-weight: bold; font-size: 14px; color: #003f7a;">📊 집계 결과</div>
+                    <div style="font-weight: bold; font-size: 13px; color: #003f7a;">📊 집계 결과</div>
                     <div class="stats-result" id="statsResult">데이터 집계 중...</div>
                 </div>
 
-                <h4 style="margin-top: 25px;">전체 작업 기록 및 삭제</h4>
-                <button type="button" class="excel-btn" onclick="exportToExcel()" style="margin-top: 5px; margin-bottom: 10px; font-size: 16px; padding: 12px;">엑셀 파일로 다운로드</button>
+                <h4 style="margin-top: 20px;">전체 작업 기록 및 작성자 확인</h4>
+                <button type="button" class="excel-btn" onclick="exportToExcel()" style="font-size: 15px; padding: 12px;">엑셀 파일로 다운로드</button>
                 <div id="adminRecordList">기록을 불러오는 중입니다...</div>
             </div>
 
             <!-- 탭 2: 항목 편집 -->
             <div class="admin-section" id="adminSection2">
-                <h4>층수 관리</h4>
+                <h4>층수 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(항목을 꾹 눌러 위아래로 끌어다 놓으세요)</span></h4>
                 <ul id="adminFloorList"></ul>
                 <div class="inline-group">
                     <input type="text" id="newFloorInput" placeholder="예: 지상 6층">
@@ -109,9 +149,9 @@
                     <button type="button" class="cancel-item-btn" onclick="cancelAddFloor()">취소</button>
                 </div>
                 
-                <hr style="border-top: 1px solid #ccc; margin: 20px 0;">
+                <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
                 
-                <h4>공종 관리</h4>
+                <h4>공종 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(항목을 꾹 눌러 위아래로 끌어다 놓으세요)</span></h4>
                 <ul id="adminWorkTypeList"></ul>
                 <div class="inline-group">
                     <input type="text" id="newWorkTypeInput" placeholder="예: 비계 설치">
@@ -129,11 +169,29 @@
             <label for="workFloor">층수 선택</label>
             <select id="workFloor" required></select>
 
-            <label for="workType">작업 공종</label>
-            <select id="workType" required></select>
+            <label for="workLocation">세부 위치 (구역 입력)</label>
+            <input type="text" id="workLocation" placeholder="예: CCSS R/M, UPW R/M, 공조실 등" required>
 
-            <label for="workAmount">작업 물량 (수량)</label>
-            <input type="number" id="workAmount" placeholder="예: 150" required>
+            <label for="workType">작업 공종</label>
+            <select id="workType" required onchange="checkEquipmentType()"></select>
+
+            <div id="equipmentDetailGroup">
+                <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #003f7a;">장비 종류 상세 입력</label>
+                <input type="text" id="equipmentName" placeholder="예: FAN, PUMP, PANEL 등" style="margin-bottom: 0; font-size: 15px;">
+            </div>
+
+            <label for="workAmount">작업 물량 및 단위</label>
+            <div class="amount-unit-group">
+                <input type="number" id="workAmount" placeholder="예: 100EA, 25inch, 50M 등" step="any" required>
+                <select id="workUnit">
+                    <option value="EA">EA (개)</option>
+                    <option value="m">m (미터)</option>
+                    <option value="inch">inch (인치)</option>
+                    <option value="㎡">㎡ (제곱미터)</option>
+                    <option value="㎥">㎥ (루베)</option>
+                    <option value="ton">ton (톤)</option>
+                </select>
+            </div>
 
             <label for="workPhoto">현장 사진 첨부</label>
             <input type="file" id="workPhoto" accept="image/*">
@@ -142,8 +200,8 @@
         </form>
 
         <!-- 본인이 등록한 내역 상시 확인 영역 -->
-        <div id="myRecordsContainer" style="margin-top: 30px;">
-            <h3 style="text-align: center; color: #003f7a; border-top: 2px solid #ddd; padding-top: 20px;">내가 등록한 작업 내역 (선택 날짜 기준)</h3>
+        <div id="myRecordsContainer" style="margin-top: 25px;">
+            <h3 style="text-align: center; color: #003f7a; border-top: 2px solid #ddd; padding-top: 15px; font-size: 16px;">내가 등록한 작업 내역 (선택 날짜 기준)</h3>
             <div id="myRecordList">내역을 불러오는 중입니다...</div>
         </div>
     </div>
@@ -166,16 +224,41 @@
         const db = getFirestore(app);
         const recordsCol = collection(db, "workRecords");
 
+        let userName = localStorage.getItem('userName');
+        let userPhone = localStorage.getItem('userPhone');
         let myClientId = localStorage.getItem('myClientId');
+
         if (!myClientId) {
             myClientId = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('myClientId', myClientId);
         }
 
+        if (!userName || !userPhone) {
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        window.saveUserInfo = function() {
+            const nameInput = document.getElementById('modalName').value.trim();
+            const phoneInput = document.getElementById('modalPhone').value.trim();
+
+            if (!nameInput || !phoneInput) {
+                alert("성함과 연락처를 모두 정확히 입력해 주세요.");
+                return;
+            }
+
+            localStorage.setItem('userName', nameInput);
+            localStorage.setItem('userPhone', phoneInput);
+            userName = nameInput;
+            userPhone = phoneInput;
+
+            document.getElementById('userModal').style.display = 'none';
+            alert(`반갑습니다, ${userName}님! 정상적으로 설정되었습니다.`);
+        };
+
         let currentDBRecords = [];
 
         const DEFAULT_FLOORS = ["지하 2층", "지하 1층", "지상 1층", "지상 2층", "지상 3층", "지상 4층", "지상 5층"];
-        const DEFAULT_WORK_TYPES = ["철근배근", "슬리브 및 매립배관", "거푸집 조립", "콘크리트 타설", "기타"];
+        const DEFAULT_WORK_TYPES = ["철근배근", "슬리브 및 매립배관", "거푸집 조립", "콘크리트 타설", "장비 설치", "기타"];
         let floors = JSON.parse(localStorage.getItem('settingFloors')) || DEFAULT_FLOORS;
         let workTypes = JSON.parse(localStorage.getItem('settingWorkTypes')) || DEFAULT_WORK_TYPES;
         let isAdmin = false;
@@ -185,12 +268,87 @@
         window.renderDropdowns = function() {
             document.getElementById('workFloor').innerHTML = '<option value="">층수를 선택하세요</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
             document.getElementById('workType').innerHTML = '<option value="">공종을 선택하세요</option>' + workTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+            checkEquipmentType();
+        };
+
+        window.checkEquipmentType = function() {
+            const selectedType = document.getElementById('workType').value;
+            const equipGroup = document.getElementById('equipmentDetailGroup');
+            const equipInput = document.getElementById('equipmentName');
+
+            if (selectedType === "장비 설치") {
+                equipGroup.style.display = "block";
+                equipInput.required = true;
+            } else {
+                equipGroup.style.display = "none";
+                equipInput.required = false;
+                equipInput.value = "";
+            }
         };
 
         window.renderAdminLists = function() {
-            document.getElementById('adminFloorList').innerHTML = floors.map((f, index) => `<li>${f} <button type="button" class="delete-btn" onclick="deleteFloor(${index})">삭제</button></li>`).join('');
-            document.getElementById('adminWorkTypeList').innerHTML = workTypes.map((t, index) => `<li>${t} <button type="button" class="delete-btn" onclick="deleteWorkType(${index})">삭제</button></li>`).join('');
+            const floorListEl = document.getElementById('adminFloorList');
+            floorListEl.innerHTML = floors.map((f, index) => `
+                <li draggable="true" data-index="${index}" data-type="floor">
+                    <span><span class="drag-handle">☰</span> ${f}</span>
+                    <button type="button" class="delete-btn" onclick="deleteFloor(${index})">삭제</button>
+                </li>
+            `).join('');
+
+            const workTypeListEl = document.getElementById('adminWorkTypeList');
+            workTypeListEl.innerHTML = workTypes.map((t, index) => `
+                <li draggable="true" data-index="${index}" data-type="workType">
+                    <span><span class="drag-handle">☰</span> ${t}</span>
+                    <button type="button" class="delete-btn" onclick="deleteWorkType(${index})">삭제</button>
+                </li>
+            `).join('');
+
+            setupDragAndDrop();
         };
+
+        function setupDragAndDrop() {
+            const items = document.querySelectorAll('.admin-panel li');
+            let draggedIndex = null;
+            let listType = null;
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedIndex = parseInt(this.getAttribute('data-index'));
+                    listType = this.getAttribute('data-type');
+                    this.classList.add('dragging');
+                });
+
+                item.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                });
+
+                item.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                });
+
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    const targetIndex = parseInt(this.getAttribute('data-index'));
+                    const targetType = this.getAttribute('data-type');
+
+                    if (draggedIndex !== null && listType === targetType && draggedIndex !== targetIndex) {
+                        if (listType === 'floor') {
+                            const movedItem = floors.splice(draggedIndex, 1)[0];
+                            floors.splice(targetIndex, 0, movedItem);
+                            localStorage.setItem('settingFloors', JSON.stringify(floors));
+                        } else if (listType === 'workType') {
+                            const movedItem = workTypes.splice(draggedIndex, 1)[0];
+                            workTypes.splice(targetIndex, 0, movedItem);
+                            localStorage.setItem('settingWorkTypes', JSON.stringify(workTypes));
+                        }
+                        renderDropdowns();
+                        renderAdminLists();
+                        updateStatsCriteriaOptions(); // 통계 세부 목록 갱신
+                        updateStats();
+                    }
+                });
+            });
+        }
 
         window.toggleAdminMode = function() {
             if (!isAdmin) {
@@ -198,6 +356,7 @@
                     isAdmin = true;
                     document.body.classList.add('admin-active');
                     document.getElementById('adminToggleBtn').innerText = "관리자 모드 끄기";
+                    updateStatsCriteriaOptions();
                     updateStats();
                 } else { alert("비밀번호가 틀렸습니다."); }
             } else {
@@ -216,11 +375,40 @@
             if (tabNumber === 1) {
                 document.getElementById('tabBtn1').classList.add('active');
                 document.getElementById('adminSection1').classList.add('active');
+                updateStatsCriteriaOptions();
                 updateStats();
             } else {
                 document.getElementById('tabBtn2').classList.add('active');
                 document.getElementById('adminSection2').classList.add('active');
             }
+        };
+
+        // 조회 기준 변경 시 세부 항목 드롭다운 목록을 동적으로 생성하는 함수
+        window.updateStatsCriteriaOptions = function() {
+            const criteria = document.getElementById('statCriteria').value;
+            const subFilter = document.getElementById('statSubFilter');
+            
+            let optionsHtml = '<option value="ALL">전체 보기 (전체 합산)</option>';
+            
+            const uniqueKeys = new Set();
+            currentDBRecords.forEach(r => {
+                if (criteria === 'floor') uniqueKeys.add(r.floor);
+                else if (criteria === 'type') uniqueKeys.add(r.type);
+                else if (criteria === 'date') uniqueKeys.add(r.date);
+                else if (criteria === 'month') uniqueKeys.add(r.date ? r.date.substring(0, 7) : '');
+            });
+
+            // 정렬 후 옵션 추가
+            Array.from(uniqueKeys).sort().forEach(key => {
+                if (key) optionsHtml += `<option value="${key}">${key}</option>`;
+            });
+
+            subFilter.innerHTML = optionsHtml;
+        };
+
+        window.onCriteriaChange = function() {
+            updateStatsCriteriaOptions();
+            updateStats();
         };
 
         window.stageAddFloor = function() {
@@ -234,6 +422,7 @@
                 input.value = '';
                 renderDropdowns();
                 renderAdminLists();
+                updateStatsCriteriaOptions();
                 updateStats();
                 alert("저장되었습니다.");
             }
@@ -247,6 +436,7 @@
                 localStorage.setItem('settingFloors', JSON.stringify(floors)); 
                 renderDropdowns(); 
                 renderAdminLists(); 
+                updateStatsCriteriaOptions();
                 updateStats(); 
             }
         };
@@ -262,6 +452,7 @@
                 input.value = '';
                 renderDropdowns();
                 renderAdminLists();
+                updateStatsCriteriaOptions();
                 updateStats();
                 alert("저장되었습니다.");
             }
@@ -275,12 +466,15 @@
                 localStorage.setItem('settingWorkTypes', JSON.stringify(workTypes)); 
                 renderDropdowns(); 
                 renderAdminLists(); 
+                updateStatsCriteriaOptions();
                 updateStats(); 
             }
         };
 
+        // 통계 집계 로직 (전체 보기 또는 특정 항목 선택 시 필터링 지원)
         window.updateStats = function() {
             const criteria = document.getElementById('statCriteria').value;
+            const subFilter = document.getElementById('statSubFilter').value;
             const resultBox = document.getElementById('statsResult');
             
             if (currentDBRecords.length === 0) {
@@ -296,15 +490,26 @@
                 else if (criteria === 'date') key = r.date || '기타';
                 else if (criteria === 'month') key = r.date ? r.date.substring(0, 7) : '기타';
 
-                const amount = Number(r.amount) || 0;
-                statsMap[key] = (statsMap[key] || 0) + amount;
+                // 특정 항목(세부 필터)이 'ALL'이 아니고 현재 항목과 다르면 제외
+                if (subFilter !== 'ALL' && key !== subFilter) {
+                    return;
+                }
+
+                const amountStr = String(r.amount || '0');
+                const parts = amountStr.split(' ');
+                const num = Number(parts[0]) || 0;
+                const unit = parts[1] || '';
+
+                if (!statsMap[key]) statsMap[key] = {};
+                statsMap[key][unit] = (statsMap[key][unit] || 0) + num;
             });
 
             let html = '';
-            for (const [key, total] of Object.entries(statsMap)) {
-                html += `<div class="stats-item"><span>${key}</span> <span>${total.toLocaleString()} 수량</span></div>`;
+            for (const [key, units] of Object.entries(statsMap)) {
+                let unitText = Object.entries(units).map(([u, val]) => `${val.toLocaleString()}${u ? ' ' + u : ''}`).join(', ');
+                html += `<div class="stats-item"><span>${key}</span> <span>${unitText}</span></div>`;
             }
-            resultBox.innerHTML = html || '집계 결과가 없습니다.';
+            resultBox.innerHTML = html || '선택한 조건에 해당하는 집계 결과가 없습니다.';
         };
 
         window.filterMyRecords = function() {
@@ -320,7 +525,7 @@
                     myDiv.className = 'record-item';
                     let photoHtml = record.photo ? `<img src="${record.photo}" class="record-photo" alt="현장 사진">` : '';
                     myDiv.innerHTML = `
-                        <div class="record-date">${record.date} | <strong>${record.floor}</strong></div>
+                        <div class="record-date">${record.date} | <strong>${record.floor} (${record.location})</strong></div>
                         <div class="record-details">[${record.type}] 물량: ${record.amount}</div>
                         ${photoHtml}
                     `;
@@ -333,7 +538,6 @@
             }
         };
 
-        // 이미지 자동 압축 함수 (오류 방지 핵심)
         function compressImage(file, maxWidth = 800, quality = 0.7) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -355,8 +559,6 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
-                        // JPEG 형태로 압축하여 반환
                         resolve(canvas.toDataURL('image/jpeg', quality));
                     };
                 };
@@ -377,30 +579,49 @@
                 const adminDiv = document.createElement('div');
                 adminDiv.className = 'record-item';
                 let photoHtml = record.photo ? `<img src="${record.photo}" class="record-photo" alt="현장 사진">` : '';
+                const authorDisplay = record.userName ? `${record.userName} (${record.userPhone})` : `ID: ${record.clientId}`;
                 adminDiv.innerHTML = `
                     <button class="delete-btn record-delete-btn" onclick="deleteDBRecord('${record.id}')">삭제</button>
-                    <div class="record-date">${record.date} | <strong>${record.floor}</strong></div>
+                    <div class="record-date">${record.date} | <strong>${record.floor} (${record.location})</strong></div>
                     <div class="record-details">[${record.type}] 물량: ${record.amount}</div>
+                    <div class="record-author">👤 작성자: ${authorDisplay}</div>
                     ${photoHtml}
                 `;
                 adminRecordList.appendChild(adminDiv);
             });
 
             if(currentDBRecords.length === 0) adminRecordList.innerHTML = '저장된 내역이 없습니다.';
+            updateStatsCriteriaOptions();
             updateStats();
             filterMyRecords();
         });
 
         document.getElementById('workForm').addEventListener('submit', async function(event) {
             event.preventDefault();
+
+            if (!userName || !userPhone) {
+                document.getElementById('userModal').style.display = 'flex';
+                return;
+            }
+
             const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = "사진 압축 및 저장 중...";
+            submitBtn.innerText = "데이터 저장 중...";
             submitBtn.disabled = true;
 
             const date = document.getElementById('workDate').value;
             const floor = document.getElementById('workFloor').value;
-            const type = document.getElementById('workType').value;
-            const amount = document.getElementById('workAmount').value;
+            const location = document.getElementById('workLocation').value.trim();
+            
+            let type = document.getElementById('workType').value;
+            const equipName = document.getElementById('equipmentName').value.trim();
+            if (type === "장비 설치" && equipName) {
+                type = `장비 설치 (${equipName})`;
+            }
+
+            const amountVal = document.getElementById('workAmount').value;
+            const unitVal = document.getElementById('workUnit').value;
+            const totalAmountText = `${amountVal} ${unitVal}`;
+
             const photoInput = document.getElementById('workPhoto');
 
             const saveToDB = async (photoDataUrl) => {
@@ -408,18 +629,23 @@
                     await addDoc(recordsCol, {
                         date: date,
                         floor: floor,
+                        location: location,
                         type: type,
-                        amount: Number(amount),
+                        amount: totalAmountText,
                         photo: photoDataUrl || '',
                         clientId: myClientId,
+                        userName: userName,
+                        userPhone: userPhone,
                         createdAt: serverTimestamp()
                     });
+                    document.getElementById('workLocation').value = '';
                     document.getElementById('workAmount').value = '';
+                    document.getElementById('equipmentName').value = '';
                     document.getElementById('workPhoto').value = '';
+                    document.getElementById('equipmentDetailGroup').style.display = "none";
                     alert("작업 물량이 성공적으로 저장되었습니다!");
                 } catch (e) {
-                    alert("데이터 저장 중 오류가 발생했습니다. 사진 용량이 너무 크지 않은지 확인해 주세요.");
-                    console.error(e);
+                    alert("데이터 저장 중 오류가 발생했습니다.");
                 } finally {
                     submitBtn.innerText = "기록 저장하기";
                     submitBtn.disabled = false;
@@ -427,7 +653,6 @@
             };
 
             if (photoInput.files && photoInput.files[0]) {
-                // 사진이 있는 경우 압축 함수 실행 후 저장
                 try {
                     const compressedDataUrl = await compressImage(photoInput.files[0]);
                     saveToDB(compressedDataUrl);
@@ -452,13 +677,17 @@
             const excelData = currentDBRecords.map(r => ({
                 "날짜": r.date,
                 "층수": r.floor,
+                "세부 위치": r.location,
                 "작업 공종": r.type,
-                "작업 물량": r.amount
+                "작업 물량": r.amount,
+                "작성자 이름": r.userName || "미확인",
+                "작성자 연락처": r.userPhone || "미확인",
+                "기기 고유 ID": r.clientId
             }));
             const worksheet = XLSX.utils.json_to_sheet(excelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "청주_PT7_4공구_물량");
-            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(통계).xlsx");
+            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(통계세부필터최종).xlsx");
         };
 
         renderDropdowns();
