@@ -113,7 +113,7 @@
                 <button type="button" class="admin-tab-btn" id="tabBtn2" onclick="switchAdminTab(2)">⚙️ 항목 편집</button>
             </div>
 
-            <!-- 탭 1: 물량 확인 (통계 및 상세 필터 추가) -->
+            <!-- 탭 1: 물량 확인 -->
             <div class="admin-section active" id="adminSection1">
                 <h4>물량 통계 조회</h4>
                 <label for="statCriteria" style="font-size: 13px; margin-top: 4px;">조회 기준</label>
@@ -263,7 +263,12 @@
         let workTypes = JSON.parse(localStorage.getItem('settingWorkTypes')) || DEFAULT_WORK_TYPES;
         let isAdmin = false;
 
-        document.getElementById('workDate').valueAsDate = new Date();
+        // 접속 시 현장 당일 날짜(YYYY-MM-DD)를 정확하게 기본 설정
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        document.getElementById('workDate').value = `${year}-${month}-${day}`;
 
         window.renderDropdowns = function() {
             document.getElementById('workFloor').innerHTML = '<option value="">층수를 선택하세요</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
@@ -343,7 +348,7 @@
                         }
                         renderDropdowns();
                         renderAdminLists();
-                        updateStatsCriteriaOptions(); // 통계 세부 목록 갱신
+                        updateStatsCriteriaOptions();
                         updateStats();
                     }
                 });
@@ -383,7 +388,6 @@
             }
         };
 
-        // 조회 기준 변경 시 세부 항목 드롭다운 목록을 동적으로 생성하는 함수
         window.updateStatsCriteriaOptions = function() {
             const criteria = document.getElementById('statCriteria').value;
             const subFilter = document.getElementById('statSubFilter');
@@ -398,7 +402,6 @@
                 else if (criteria === 'month') uniqueKeys.add(r.date ? r.date.substring(0, 7) : '');
             });
 
-            // 정렬 후 옵션 추가
             Array.from(uniqueKeys).sort().forEach(key => {
                 if (key) optionsHtml += `<option value="${key}">${key}</option>`;
             });
@@ -471,7 +474,6 @@
             }
         };
 
-        // 통계 집계 로직 (전체 보기 또는 특정 항목 선택 시 필터링 지원)
         window.updateStats = function() {
             const criteria = document.getElementById('statCriteria').value;
             const subFilter = document.getElementById('statSubFilter').value;
@@ -490,7 +492,6 @@
                 else if (criteria === 'date') key = r.date || '기타';
                 else if (criteria === 'month') key = r.date ? r.date.substring(0, 7) : '기타';
 
-                // 특정 항목(세부 필터)이 'ALL'이 아니고 현재 항목과 다르면 제외
                 if (subFilter !== 'ALL' && key !== subFilter) {
                     return;
                 }
@@ -687,7 +688,7 @@
             const worksheet = XLSX.utils.json_to_sheet(excelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "청주_PT7_4공구_물량");
-            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(통계세부필터최종).xlsx");
+            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(최종완성).xlsx");
         };
 
         renderDropdowns();
