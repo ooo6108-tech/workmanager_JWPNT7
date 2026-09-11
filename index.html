@@ -14,22 +14,28 @@
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; display: flex; justify-content: center; padding: 10px; }
         .app-container { background-color: white; width: 100%; max-width: 550px; padding: 15px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-top: 6px solid #003f7a; position: relative; }
         
-        .header-titles { text-align: center; margin-bottom: 20px; }
-        .header-titles h1 { color: #003f7a; font-size: 20px; font-weight: 900; margin: 0 0 5px 0; }
-        .header-titles h2 { color: #333; font-size: 16px; font-weight: 700; margin: 0 0 10px 0; }
-        .header-titles h3 { color: #666; font-size: 14px; font-weight: 400; margin: 0; background: #f0f0f0; display: inline-block; padding: 4px 12px; border-radius: 20px; }
+        /* 상단 타이틀 영역 (우측 투명 터치 박스 기준을 잡기 위해 relative 설정) */
+        .header-titles { text-align: center; margin-bottom: 20px; padding: 15px 5px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; position: relative; }
+        .header-titles h1 { color: #003f7a; font-size: 21px; font-weight: 900; margin: 0 0 8px 0; }
+        
+        .sub-header-row { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+        .header-titles h2 { color: #333; font-size: 17px; font-weight: 700; margin: 0; }
+        
+        /* 우측 상단 투명 히든 터치 박스 (회사명 높이부터 프로젝트명까지 우측 영역 전체로 확장) */
+        #hiddenAdminTrigger { position: absolute; right: 0; top: 0; width: 60px; height: 100%; cursor: pointer; background: transparent; z-index: 10; }
+
+        .header-titles h3 { color: #555; font-size: 14px; font-weight: 700; margin: 0; background: #e2e8f0; display: inline-block; padding: 6px 14px; border-radius: 20px; }
         
         h4 { color: #333; margin-top: 15px; margin-bottom: 5px; }
         label { font-weight: 700; margin-top: 15px; display: block; color: #000; font-size: 15px; }
         
-        /* 모바일에서 날짜 칸을 포함한 모든 입력창이 박스 안쪽에 정확히 안착되도록 강제 제한 */
         input[type="date"], input[type="number"], input[type="text"], select, input[type="file"], button { width: 100% !important; max-width: 100% !important; padding: 12px; margin-top: 6px; margin-bottom: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; background-color: #fff; }
         input:focus, select:focus { border-color: #003f7a; outline: none; }
         
         button { background-color: #003f7a; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #002855; }
         
-        #equipmentDetailGroup { display: none; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px dashed #003f7a; margin-bottom: 12px; width: 100%; }
+        .sub-detail-group { display: none; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px dashed #003f7a; margin-bottom: 12px; width: 100%; }
 
         .amount-unit-group { display: flex; gap: 8px; width: 100%; }
         .amount-unit-group input[type="number"] { flex: 2; margin-bottom: 0; }
@@ -43,8 +49,6 @@
         .record-details { font-size: 16px; font-weight: 900; color: #111; margin-top: 6px; }
         .record-author { font-size: 13px; color: #003f7a; margin-top: 6px; font-weight: bold; background: #eef2f5; padding: 4px 8px; display: inline-block; border-radius: 4px; }
         .record-photo { max-width: 100%; height: auto; margin-top: 8px; border-radius: 6px; border: 1px solid #ddd; }
-        
-        .admin-toggle-btn { background-color: #6c757d; margin-bottom: 15px; font-size: 15px; padding: 10px; }
         
         .admin-panel { display: none; background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px dashed #6c757d; }
         .admin-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -62,7 +66,11 @@
         .drag-handle { color: #888; font-size: 16px; margin-right: 8px; flex-shrink: 0; }
         .admin-panel li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .delete-btn { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto !important; height: auto !important; margin: 0 !important; flex-shrink: 0; }
+        .item-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
+        .edit-btn { background-color: #ffc107; color: #000; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; width: auto !important; height: auto !important; margin: 0 !important; }
+        .edit-btn:hover { background-color: #e0a800; }
+
+        .delete-btn { background-color: #dc3545; color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; width: auto !important; height: auto !important; margin: 0 !important; }
         .delete-btn:hover { background-color: #c82333; }
         .record-delete-btn { position: absolute; top: 12px; right: 12px; }
 
@@ -80,7 +88,6 @@
         .modal-content { background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #003f7a; }
 
         body.admin-active .admin-panel { display: block; }
-        body.admin-active .admin-toggle-btn { background-color: #dc3545; }
         body.admin-active #workForm { display: none; }
         body.admin-active #myRecordsContainer { display: none; }
     </style>
@@ -103,13 +110,17 @@
     </div>
 
     <div class="app-container">
+        <!-- 상단 타이틀 영역 (우측 상단 투명 터치 박스가 회사명 높이부터 전체 커버) -->
         <div class="header-titles">
+            <!-- 우측 상단 투명 히든 터치 박스 (헤더 최상단 우측에 배치) -->
+            <div id="hiddenAdminTrigger" title="관리자 진입 구역"></div>
+
             <h1>중원엔지니어링(주)</h1>
-            <h2>청주 P&T7 신축공사 - 4공구</h2>
+            <div class="sub-header-row">
+                <h2>청주 P&T7 신축공사 - 4공구</h2>
+            </div>
             <h3>현장 작업물량 관리</h3>
         </div>
-        
-        <button type="button" class="admin-toggle-btn" id="adminToggleBtn" onclick="toggleAdminMode()">관리자 모드 켜기</button>
 
         <!-- 관리자 통합 패널 -->
         <div class="admin-panel" id="adminPanel">
@@ -146,7 +157,7 @@
 
             <!-- 탭 2: 항목 편집 -->
             <div class="admin-section" id="adminSection2">
-                <h4>층수 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(항목을 꾹 눌러 위아래로 끌어다 놓으세요)</span></h4>
+                <h4>층수 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(꾹 눌러서 순서 이동 가능)</span></h4>
                 <ul id="adminFloorList"></ul>
                 <div class="inline-group">
                     <input type="text" id="newFloorInput" placeholder="예: 지상 6층">
@@ -156,7 +167,7 @@
                 
                 <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
                 
-                <h4>공종 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(항목을 꾹 눌러 위아래로 끌어다 놓으세요)</span></h4>
+                <h4>공종 관리 <span style="font-size:12px; color:#555; font-weight:normal;">(꾹 눌러서 순서 이동 가능)</span></h4>
                 <ul id="adminWorkTypeList"></ul>
                 <div class="inline-group">
                     <input type="text" id="newWorkTypeInput" placeholder="예: 비계 설치">
@@ -178,11 +189,23 @@
             <input type="text" id="workLocation" placeholder="예: CCSS R/M, UPW R/M, 공조실 등" required>
 
             <label for="workType">작업 공종</label>
-            <select id="workType" required onchange="checkEquipmentType()"></select>
+            <select id="workType" required onchange="checkWorkTypeDetails()"></select>
 
-            <div id="equipmentDetailGroup">
+            <!-- '장비 설치' 선택 시 나타나는 상세 입력 그룹 -->
+            <div id="equipmentDetailGroup" class="sub-detail-group">
                 <label for="equipmentName" style="margin-top: 0; font-size: 14px; color: #003f7a;">장비 종류 상세 입력</label>
                 <input type="text" id="equipmentName" placeholder="예: FAN, PUMP, PANEL 등" style="margin-bottom: 0; font-size: 15px;">
+            </div>
+
+            <!-- '보온 설치' 선택 시 나타나는 상세 선택 그룹 -->
+            <div id="insulationDetailGroup" class="sub-detail-group">
+                <label for="insulationType" style="margin-top: 0; font-size: 14px; color: #003f7a;">보온재 종류 선택</label>
+                <select id="insulationType" style="margin-bottom: 0; font-size: 15px;">
+                    <option value="">보온재를 선택하세요</option>
+                    <option value="방화마감">방화마감</option>
+                    <option value="고무발포보온재">고무발포보온재</option>
+                    <option value="그라스울">그라스울</option>
+                </select>
             </div>
 
             <label for="workAmount">작업 물량 및 단위</label>
@@ -213,7 +236,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCMQBeNwlGOn4CaVAl643S7qtKL2I6I9jw",
@@ -264,10 +287,10 @@
         let currentDBRecords = [];
 
         const DEFAULT_FLOORS = ["지하 2층", "지하 1층", "지상 1층", "지상 2층", "지상 3층", "지상 4층", "지상 5층"];
-        const DEFAULT_WORK_TYPES = ["철근배근", "슬리브 및 매립배관", "거푸집 조립", "콘크리트 타설", "장비 설치", "기타"];
+        const DEFAULT_WORK_TYPES = ["철근배근", "슬리브 및 매립배관", "거푸집 조립", "콘크리트 타설", "장비 설치", "보온 설치", "기타"];
         
-        let floors = DEFAULT_FLOORS;
-        let workTypes = DEFAULT_WORK_TYPES;
+        let floors = [];
+        let workTypes = [];
         let isAdmin = false;
 
         const today = new Date();
@@ -276,12 +299,44 @@
         const day = String(today.getDate()).padStart(2, '0');
         document.getElementById('workDate').value = `${year}-${month}-${day}`;
 
+        // 상단 헤더 우측 전체 영역 투명 터치 박스 더블 탭(더블 클릭) 감지 제스처 구현
+        let lastTapTime = 0;
+        const hiddenTrigger = document.getElementById('hiddenAdminTrigger');
+
+        hiddenTrigger.addEventListener('click', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            
+            if (tapLength < 300 && tapLength > 0) {
+                triggerAdminAccess();
+                e.preventDefault();
+            }
+            lastTapTime = currentTime;
+        });
+
+        function triggerAdminAccess() {
+            if (!isAdmin) {
+                if (prompt("관리자 비밀번호를 입력하세요.") === "1010") {
+                    isAdmin = true;
+                    document.body.classList.add('admin-active');
+                    renderAdminLists();
+                    updateStatsCriteriaOptions();
+                    updateStats();
+                } else { alert("비밀번호가 틀렸습니다."); }
+            } else {
+                isAdmin = false;
+                document.body.classList.remove('admin-active');
+            }
+        }
+
         onSnapshot(settingsDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                if (data.floors) floors = data.floors;
-                if (data.workTypes) workTypes = data.workTypes;
+                floors = data.floors && data.floors.length > 0 ? data.floors : DEFAULT_FLOORS;
+                workTypes = data.workTypes && data.workTypes.length > 0 ? data.workTypes : DEFAULT_WORK_TYPES;
             } else {
+                floors = DEFAULT_FLOORS;
+                workTypes = DEFAULT_WORK_TYPES;
                 setDoc(settingsDocRef, { floors: DEFAULT_FLOORS, workTypes: DEFAULT_WORK_TYPES });
             }
             renderDropdowns();
@@ -301,13 +356,17 @@
         window.renderDropdowns = function() {
             document.getElementById('workFloor').innerHTML = '<option value="">층수를 선택하세요</option>' + floors.map(f => `<option value="${f}">${f}</option>`).join('');
             document.getElementById('workType').innerHTML = '<option value="">공종을 선택하세요</option>' + workTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-            checkEquipmentType();
+            checkWorkTypeDetails();
         };
 
-        window.checkEquipmentType = function() {
+        window.checkWorkTypeDetails = function() {
             const selectedType = document.getElementById('workType').value;
+            
             const equipGroup = document.getElementById('equipmentDetailGroup');
             const equipInput = document.getElementById('equipmentName');
+            
+            const insulGroup = document.getElementById('insulationDetailGroup');
+            const insulInput = document.getElementById('insulationType');
 
             if (selectedType === "장비 설치") {
                 equipGroup.style.display = "block";
@@ -317,6 +376,15 @@
                 equipInput.required = false;
                 equipInput.value = "";
             }
+
+            if (selectedType === "보온 설치") {
+                insulGroup.style.display = "block";
+                insulInput.required = true;
+            } else {
+                insulGroup.style.display = "none";
+                insulInput.required = false;
+                insulInput.value = "";
+            }
         };
 
         window.renderAdminLists = function() {
@@ -324,7 +392,10 @@
             floorListEl.innerHTML = floors.map((f, index) => `
                 <li draggable="true" data-index="${index}" data-type="floor">
                     <span><span class="drag-handle">☰</span> ${f}</span>
-                    <button type="button" class="delete-btn" onclick="deleteFloor(${index})">삭제</button>
+                    <div class="item-btn-group">
+                        <button type="button" class="edit-btn" onclick="editFloor(${index})">수정</button>
+                        <button type="button" class="delete-btn" onclick="deleteFloor(${index})">삭제</button>
+                    </div>
                 </li>
             `).join('');
 
@@ -332,11 +403,48 @@
             workTypeListEl.innerHTML = workTypes.map((t, index) => `
                 <li draggable="true" data-index="${index}" data-type="workType">
                     <span><span class="drag-handle">☰</span> ${t}</span>
-                    <button type="button" class="delete-btn" onclick="deleteWorkType(${index})">삭제</button>
+                    <div class="item-btn-group">
+                        <button type="button" class="edit-btn" onclick="editWorkType(${index})">수정</button>
+                        <button type="button" class="delete-btn" onclick="deleteWorkType(${index})">삭제</button>
+                    </div>
                 </li>
             `).join('');
 
             setupDragAndDrop();
+        };
+
+        window.editFloor = function(index) {
+            const currentVal = floors[index];
+            const newVal = prompt("수정할 층수 이름을 입력하세요:", currentVal);
+            if (newVal === null) return;
+            const trimmed = newVal.trim();
+            if (!trimmed) { alert("올바른 이름을 입력해주세요."); return; }
+            if (floors.includes(trimmed) && trimmed !== currentVal) { alert("이미 존재하는 층수입니다."); return; }
+            
+            floors[index] = trimmed;
+            saveSettingsToDB();
+            renderDropdowns();
+            renderAdminLists();
+            updateStatsCriteriaOptions();
+            updateStats();
+            alert("수정되었습니다.");
+        };
+
+        window.editWorkType = function(index) {
+            const currentVal = workTypes[index];
+            const newVal = prompt("수정할 공종 이름을 입력하세요:", currentVal);
+            if (newVal === null) return;
+            const trimmed = newVal.trim();
+            if (!trimmed) { alert("올바른 이름을 입력해주세요."); return; }
+            if (workTypes.includes(trimmed) && trimmed !== currentVal) { alert("이미 존재하는 공종입니다."); return; }
+            
+            workTypes[index] = trimmed;
+            saveSettingsToDB();
+            renderDropdowns();
+            renderAdminLists();
+            updateStatsCriteriaOptions();
+            updateStats();
+            alert("수정되었습니다.");
         };
 
         function setupDragAndDrop() {
@@ -381,23 +489,6 @@
                 });
             });
         }
-
-        window.toggleAdminMode = function() {
-            if (!isAdmin) {
-                if (prompt("관리자 비밀번호를 입력하세요.") === "1010") {
-                    isAdmin = true;
-                    document.body.classList.add('admin-active');
-                    document.getElementById('adminToggleBtn').innerText = "관리자 모드 끄기";
-                    renderAdminLists();
-                    updateStatsCriteriaOptions();
-                    updateStats();
-                } else { alert("비밀번호가 틀렸습니다."); }
-            } else {
-                isAdmin = false;
-                document.body.classList.remove('admin-active');
-                document.getElementById('adminToggleBtn').innerText = "관리자 모드 켜기";
-            }
-        };
 
         window.switchAdminTab = function(tabNumber) {
             document.getElementById('tabBtn1').classList.remove('active');
@@ -643,9 +734,15 @@
             const location = document.getElementById('workLocation').value.trim();
             
             let type = document.getElementById('workType').value;
+            
             const equipName = document.getElementById('equipmentName').value.trim();
             if (type === "장비 설치" && equipName) {
                 type = `장비 설치 (${equipName})`;
+            }
+
+            const insulVal = document.getElementById('insulationType').value;
+            if (type === "보온 설치" && insulVal) {
+                type = `보온 설치 (${insulVal})`;
             }
 
             const amountVal = document.getElementById('workAmount').value;
@@ -671,8 +768,10 @@
                     document.getElementById('workLocation').value = '';
                     document.getElementById('workAmount').value = '';
                     document.getElementById('equipmentName').value = '';
+                    document.getElementById('insulationType').value = '';
                     document.getElementById('workPhoto').value = '';
                     document.getElementById('equipmentDetailGroup').style.display = "none";
+                    document.getElementById('insulationDetailGroup').style.display = "none";
                     alert("작업 물량이 성공적으로 저장되었습니다!");
                 } catch (e) {
                     alert("데이터 저장 중 오류가 발생했습니다.");
@@ -717,7 +816,7 @@
             const worksheet = XLSX.utils.json_to_sheet(excelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "청주_PT7_4공구_물량");
-            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(최종완성).xlsx");
+            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(우측상단확장최종).xlsx");
         };
     </script>
 </body>
