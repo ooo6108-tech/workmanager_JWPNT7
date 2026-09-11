@@ -14,14 +14,14 @@
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #eef2f5; color: #111; display: flex; justify-content: center; padding: 10px; }
         .app-container { background-color: white; width: 100%; max-width: 550px; padding: 15px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-top: 6px solid #003f7a; position: relative; }
         
-        /* 상단 타이틀 영역 (우측 투명 터치 박스 기준을 잡기 위해 relative 설정) */
+        /* 상단 타이틀 영역 */
         .header-titles { text-align: center; margin-bottom: 20px; padding: 15px 5px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; position: relative; }
         .header-titles h1 { color: #003f7a; font-size: 21px; font-weight: 900; margin: 0 0 8px 0; }
         
         .sub-header-row { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
         .header-titles h2 { color: #333; font-size: 17px; font-weight: 700; margin: 0; }
         
-        /* 우측 상단 투명 히든 터치 박스 (회사명 높이부터 프로젝트명까지 우측 영역 전체로 확장) */
+        /* 우측 상단 투명 히든 터치 박스 (관리자 진입 구역) */
         #hiddenAdminTrigger { position: absolute; right: 0; top: 0; width: 60px; height: 100%; cursor: pointer; background: transparent; z-index: 10; }
 
         .header-titles h3 { color: #555; font-size: 14px; font-weight: 700; margin: 0; background: #e2e8f0; display: inline-block; padding: 6px 14px; border-radius: 20px; }
@@ -84,8 +84,16 @@
         .stats-result { margin-top: 8px; max-height: 180px; overflow-y: auto; font-size: 14px; }
         .stats-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold; }
 
-        #userModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-        .modal-content { background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #003f7a; }
+        /* [고대비 호버 효과] 마우스 오버/터치 시 진한 주황색으로 확 바뀌어 확실한 구분 제공 */
+        svg g:hover polygon {
+            fill: rgba(255, 111, 0, 0.75) !important;
+            stroke: #d32f2f !important;
+            stroke-width: 5px !important;
+            transition: all 0.15s ease;
+        }
+
+        #userModal, #svgMapModal, #polygonEditorModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 6px solid #003f7a; }
 
         body.admin-active .admin-panel { display: block; }
         body.admin-active #workForm { display: none; }
@@ -109,12 +117,51 @@
         </div>
     </div>
 
-    <div class="app-container">
-        <!-- 상단 타이틀 영역 (우측 상단 투명 터치 박스가 회사명 높이부터 전체 커버) -->
-        <div class="header-titles">
-            <!-- 우측 상단 투명 히든 터치 박스 (헤더 최상단 우측에 배치) -->
-            <div id="hiddenAdminTrigger" title="관리자 진입 구역"></div>
+    <!-- 작업자용 SVG 도면 구역 선택 팝업 모달 (빨간 테두리 + 노란 채우기 + 고대비 호버) -->
+    <div id="svgMapModal" style="display:none;">
+        <div class="modal-content">
+            <h3 style="color: #003f7a; margin-top: 0; text-align: center;" id="mapModalTitle">🗺️ 현장 도면 구역 선택</h3>
+            <p style="font-size: 13px; color: #555; text-align: center; margin-bottom: 15px;">원하는 구역을 터치하면 위치가 자동 입력됩니다. (올리면 색상 강조)</p>
+            
+            <div id="svgContainer" style="width: 100%; position: relative; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; background: #f0f0f0; text-align: center; max-height: 400px; overflow-y: auto;">
+                <!-- 도면 및 구역 렌더링 영역 -->
+            </div>
 
+            <button type="button" onclick="closeSvgMapModal()" style="background-color: #6c757d; margin-top: 15px; padding: 12px;">닫기</button>
+        </div>
+    </div>
+
+    <!-- 관리자용 다각형 구역 편집기 모달 (스냅 강화 적용) -->
+    <div id="polygonEditorModal" style="display:none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="color: #003f7a; margin-top: 0; text-align: center;" id="editorModalTitle">✏️ 다각형 구역 편집기</h3>
+            <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 10px;">도면 위를 클릭하여 꼭짓점을 찍으세요. (수직·수평 자동 정렬 범위 35px)</p>
+            
+            <div id="editorCanvasContainer" style="width: 100%; position: relative; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; background: #fff; text-align: center; cursor: crosshair;" onclick="onEditorCanvasClick(event)">
+                <!-- 편집용 SVG 도면 및 점 표시 영역 -->
+            </div>
+
+            <div style="margin-top: 12px;">
+                <label for="zoneNameInput" style="font-size: 13px; margin-top: 0;">실(구역) 이름 입력</label>
+                <input type="text" id="zoneNameInput" placeholder="예: CCSS R/M" style="margin-bottom: 8px; padding: 8px; font-size: 14px;">
+                
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" onclick="saveCurrentPolygon()" style="background-color: #28a745; margin-bottom: 0; padding: 10px; font-size: 14px; flex: 1;">구역 저장</button>
+                    <button type="button" onclick="resetCurrentPolygon()" style="background-color: #ffc107; color: #000; margin-bottom: 0; padding: 10px; font-size: 14px; flex: 1;">점 초기화</button>
+                    <button type="button" onclick="closePolygonEditor()" style="background-color: #6c757d; margin-bottom: 0; padding: 10px; font-size: 14px; flex: 1;">닫기</button>
+                </div>
+            </div>
+            
+            <div id="currentZonesList" style="margin-top: 12px; max-height: 100px; overflow-y: auto; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                <!-- 등록된 구역 목록 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- 상단 타이틀 영역 -->
+        <div class="header-titles">
+            <div id="hiddenAdminTrigger" title="관리자 진입 구역"></div>
             <h1>중원엔지니어링(주)</h1>
             <div class="sub-header-row">
                 <h2>청주 P&T7 신축공사 - 4공구</h2>
@@ -174,6 +221,12 @@
                     <button type="button" class="save-item-btn" onclick="stageAddWorkType()">저장</button>
                     <button type="button" class="cancel-item-btn" onclick="cancelAddWorkType()">취소</button>
                 </div>
+
+                <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
+                
+                <h4>층별 도면 업로드 및 구역 세분화</h4>
+                <p style="font-size: 12px; color: #555; margin-bottom: 8px;">도면을 등록하고 다각형 구역을 세분화하여 지정하세요.</p>
+                <div id="adminDrawingList">도면 목록을 불러오는 중...</div>
             </div>
         </div>
         
@@ -186,7 +239,10 @@
             <select id="workFloor" required></select>
 
             <label for="workLocation">세부 위치 (구역 입력)</label>
-            <input type="text" id="workLocation" placeholder="예: CCSS R/M, UPW R/M, 공조실 등" required>
+            <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                <input type="text" id="workLocation" placeholder="예: CCSS R/M, UPW R/M 등" required style="margin-bottom: 0; flex: 1;">
+                <button type="button" id="openMapBtn" onclick="openSvgMapModal()" style="width: 110px !important; margin-bottom: 0; background-color: #28a745; font-size: 14px;">도면에서 선택</button>
+            </div>
 
             <label for="workType">작업 공종</label>
             <select id="workType" required onchange="checkWorkTypeDetails()"></select>
@@ -291,7 +347,11 @@
         
         let floors = [];
         let workTypes = [];
+        let floorDrawings = {}; 
         let isAdmin = false;
+
+        let editingFloor = null;
+        let currentPoints = [];
 
         const today = new Date();
         const year = today.getFullYear();
@@ -299,7 +359,245 @@
         const day = String(today.getDate()).padStart(2, '0');
         document.getElementById('workDate').value = `${year}-${month}-${day}`;
 
-        // 상단 헤더 우측 전체 영역 투명 터치 박스 더블 탭(더블 클릭) 감지 제스처 구현
+        // 작업자용 SVG 도면 팝업 제어 (빨간 테두리 + 노란 채우기 기본 적용)
+        window.openSvgMapModal = function() {
+            const selectedFloor = document.getElementById('workFloor').value;
+            if (!selectedFloor) {
+                alert("먼저 층수를 선택해 주세요.");
+                return;
+            }
+            document.getElementById('svgMapModal').style.display = 'flex';
+            document.getElementById('mapModalTitle').innerText = `🗺️ ${selectedFloor} 도면 구역 선택`;
+            loadFloorSvgData(selectedFloor);
+        };
+
+        window.closeSvgMapModal = function() {
+            document.getElementById('svgMapModal').style.display = 'none';
+        };
+
+        function loadFloorSvgData(floorName) {
+            const svgContainer = document.getElementById('svgContainer');
+            const drawingData = floorDrawings[floorName];
+
+            if (!drawingData || !drawingData.image) {
+                svgContainer.innerHTML = `
+                    <div style="padding: 40px; color: #666; font-size: 14px;">
+                        ⚠️ 등록된 도면이 없습니다.<br>관리자 모드에서 해당 층의 도면을 먼저 업로드해 주세요.
+                    </div>
+                `;
+                return;
+            }
+
+            let polygonsHtml = '';
+            if (drawingData.polygons && drawingData.polygons.length > 0) {
+                drawingData.polygons.forEach(p => {
+                    const safeName = p.name.replace(/'/g, "\\'");
+                    polygonsHtml += `
+                        <g style="cursor: pointer;" onclick="selectMapLocation('${safeName}')">
+                            <title>구역: ${p.name} (선택하려면 터치)</title>
+                            <!-- 기본: 노란색 반투명 채우기 + 빨간색 테두리 -->
+                            <polygon points="${p.points}" fill="rgba(255, 235, 59, 0.45)" stroke="#ff0000" stroke-width="3"/>
+                            <text x="${p.textX}" y="${p.textY}" font-size="13" font-weight="900" fill="#000" text-anchor="middle" dominant-baseline="middle" style="pointer-events: none; paint-order: stroke; stroke: #fff; stroke-width: 3.5px;">${p.name}</text>
+                        </g>
+                    `;
+                });
+            } else {
+                polygonsHtml = `<text x="400" y="50" font-size="16" fill="#666" text-anchor="middle">세부 구역이 설정되지 않았습니다. 전체 도면을 터치하세요.</text>`;
+            }
+
+            const safeFloorName = floorName.replace(/'/g, "\\'");
+            svgContainer.innerHTML = `
+                <svg viewBox="0 0 800 600" style="width: 100%; height: auto; display: block; background: #fff;" onclick="if(event.target.tagName === 'image' || event.target.tagName === 'svg') selectMapLocation('${safeFloorName} 전체')">
+                    <image href="${drawingData.image}" width="800" height="600" preserveAspectRatio="xMidYMid slice"/>
+                    ${polygonsHtml}
+                </svg>
+            `;
+        }
+
+        window.selectMapLocation = function(locationName) {
+            document.getElementById('workLocation').value = locationName;
+            closeSvgMapModal();
+        };
+
+        // 관리자용 다각형 구역 편집기 제어
+        window.openPolygonEditor = function(floorName) {
+            const drawingData = floorDrawings[floorName];
+            if (!drawingData || !drawingData.image) {
+                alert("먼저 해당 층의 도면 이미지를 업로드해주세요.");
+                return;
+            }
+            editingFloor = floorName;
+            currentPoints = [];
+            document.getElementById('editorModalTitle').innerText = `✏️ ${floorName} 구역 세분화 편집기`;
+            document.getElementById('zoneNameInput').value = '';
+            document.getElementById('polygonEditorModal').style.display = 'flex';
+            renderEditorCanvas();
+            renderZonesList();
+        };
+
+        window.closePolygonEditor = function() {
+            document.getElementById('polygonEditorModal').style.display = 'none';
+            editingFloor = null;
+        };
+
+        function renderEditorCanvas() {
+            const container = document.getElementById('editorCanvasContainer');
+            const drawingData = floorDrawings[editingFloor];
+            
+            let existingPolygons = '';
+            if (drawingData.polygons) {
+                drawingData.polygons.forEach((p, idx) => {
+                    existingPolygons += `
+                        <polygon points="${p.points}" fill="rgba(40, 167, 69, 0.3)" stroke="#28a745" stroke-width="2"/>
+                        <text x="${p.textX}" y="${p.textY}" font-size="12" font-weight="bold" fill="#28a745" text-anchor="middle">${p.name}</text>
+                    `;
+                });
+            }
+
+            let currentPathPoints = currentPoints.map(pt => `${pt.x},${pt.y}`).join(' ');
+            let pointsCircles = currentPoints.map((pt, idx) => `
+                <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#dc3545"/>
+                <text x="${pt.x + 8}" y="${pt.y + 4}" font-size="10" fill="#dc3545" font-weight="bold">${idx+1}</text>
+            `).join('');
+
+            let activePolygon = currentPoints.length > 1 ? `<polyline points="${currentPathPoints}" fill="none" stroke="#dc3545" stroke-width="2"/>` : '';
+
+            container.innerHTML = `
+                <svg viewBox="0 0 800 600" style="width: 100%; height: auto; display: block; background: #fff;">
+                    <image href="${drawingData.image}" width="800" height="600" preserveAspectRatio="xMidYMid slice"/>
+                    ${existingPolygons}
+                    ${activePolygon}
+                    ${pointsCircles}
+                </svg>
+            `;
+        }
+
+        // [강화된 수직·수평 자동 스냅 정렬 로직 (오차 범위 35픽셀)]
+        window.onEditorCanvasClick = function(event) {
+            const svg = event.currentTarget.querySelector('svg');
+            const rect = svg.getBoundingClientRect();
+            
+            let x = Math.round((event.clientX - rect.left) * (800 / rect.width));
+            let y = Math.round((event.clientY - rect.top) * (600 / rect.height));
+
+            const SNAP_THRESHOLD = 35;
+
+            if (currentPoints.length > 0) {
+                const lastPt = currentPoints[currentPoints.length - 1];
+                const firstPt = currentPoints[0];
+
+                if (Math.abs(x - lastPt.x) < SNAP_THRESHOLD) {
+                    x = lastPt.x;
+                } else if (Math.abs(y - lastPt.y) < SNAP_THRESHOLD) {
+                    y = lastPt.y;
+                }
+
+                if (Math.abs(x - firstPt.x) < SNAP_THRESHOLD) {
+                    x = firstPt.x;
+                } else if (Math.abs(y - firstPt.y) < SNAP_THRESHOLD) {
+                    y = firstPt.y;
+                }
+            }
+
+            currentPoints.push({ x, y });
+            renderEditorCanvas();
+        };
+
+        window.resetCurrentPolygon = function() {
+            currentPoints = [];
+            renderEditorCanvas();
+        };
+
+        window.saveCurrentPolygon = function() {
+            const zoneName = document.getElementById('zoneNameInput').value.trim();
+            if (!zoneName) {
+                alert("실(구역) 이름을 입력해주세요.");
+                return;
+            }
+            if (currentPoints.length < 3) {
+                alert("다각형을 이루려면 최소 3개 이상의 점을 찍어야 합니다.");
+                return;
+            }
+
+            const pointsStr = currentPoints.map(pt => `${pt.x},${pt.y}`).join(' ');
+            
+            let sumX = 0, sumY = 0;
+            currentPoints.forEach(pt => { sumX += pt.x; sumY += pt.y; });
+            const textX = Math.round(sumX / currentPoints.length);
+            const textY = Math.round(sumY / currentPoints.length);
+
+            if (!floorDrawings[editingFloor].polygons) {
+                floorDrawings[editingFloor].polygons = [];
+            }
+
+            floorDrawings[editingFloor].polygons.push({
+                name: zoneName,
+                points: pointsStr,
+                textX: textX,
+                textY: textY
+            });
+
+            saveSettingsToDB();
+            currentPoints = [];
+            document.getElementById('zoneNameInput').value = '';
+            renderEditorCanvas();
+            renderZonesList();
+            alert(`'${zoneName}' 구역이 추가되었습니다.`);
+        };
+
+        function renderZonesList() {
+            const listEl = document.getElementById('currentZonesList');
+            const drawingData = floorDrawings[editingFloor];
+            if (!drawingData.polygons || drawingData.polygons.length === 0) {
+                listEl.innerHTML = '등록된 세부 구역이 없습니다.';
+                return;
+            }
+
+            listEl.innerHTML = drawingData.polygons.map((p, index) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd;">
+                    <span>📍 <strong>${p.name}</strong></span>
+                    <button type="button" onclick="deletePolygonZone(${index})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; font-size: 11px; border-radius: 3px; width: auto !important; height: auto !important; margin: 0 !important;">삭제</button>
+                </div>
+            `).join('');
+        }
+
+        window.deletePolygonZone = function(index) {
+            if (confirm("이 구역을 삭제하시겠습니까?")) {
+                floorDrawings[editingFloor].polygons.splice(index, 1);
+                saveSettingsToDB();
+                renderEditorCanvas();
+                renderZonesList();
+            }
+        };
+
+        // 관리자 모드 도면 업로드 처리
+        window.uploadDrawing = function(floorName, fileInput) {
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.readAsDataURL(fileInput.files[0]);
+                reader.onload = function(e) {
+                    if (!floorDrawings[floorName]) floorDrawings[floorName] = {};
+                    floorDrawings[floorName].image = e.target.result;
+                    if (!floorDrawings[floorName].polygons) floorDrawings[floorName].polygons = [];
+                    saveSettingsToDB();
+                    renderAdminLists();
+                    alert(`'${floorName}' 도면이 업로드되었습니다! [구역 편집] 버튼을 눌러 실을 세분화해 주세요.`);
+                };
+            }
+        };
+
+        window.deleteDrawing = function(floorName) {
+            if (confirm(`'${floorName}' 도면을 삭제하시겠습니까?`)) {
+                if (floorDrawings[floorName]) {
+                    delete floorDrawings[floorName];
+                    saveSettingsToDB();
+                    renderAdminLists();
+                    alert("도면이 삭제되었습니다.");
+                }
+            }
+        };
+
+        // 관리자 진입 제스처 (우측 상단 투명 터치 박스)
         let lastTapTime = 0;
         const hiddenTrigger = document.getElementById('hiddenAdminTrigger');
 
@@ -334,10 +632,11 @@
                 const data = docSnap.data();
                 floors = data.floors && data.floors.length > 0 ? data.floors : DEFAULT_FLOORS;
                 workTypes = data.workTypes && data.workTypes.length > 0 ? data.workTypes : DEFAULT_WORK_TYPES;
+                floorDrawings = data.floorDrawings || {};
             } else {
                 floors = DEFAULT_FLOORS;
                 workTypes = DEFAULT_WORK_TYPES;
-                setDoc(settingsDocRef, { floors: DEFAULT_FLOORS, workTypes: DEFAULT_WORK_TYPES });
+                setDoc(settingsDocRef, { floors: DEFAULT_FLOORS, workTypes: DEFAULT_WORK_TYPES, floorDrawings: {} });
             }
             renderDropdowns();
             if (isAdmin) renderAdminLists();
@@ -347,7 +646,7 @@
 
         async function saveSettingsToDB() {
             try {
-                await setDoc(settingsDocRef, { floors: floors, workTypes: workTypes });
+                await setDoc(settingsDocRef, { floors: floors, workTypes: workTypes, floorDrawings: floorDrawings });
             } catch (e) {
                 console.error("설정 저장 오류:", e);
             }
@@ -409,6 +708,24 @@
                     </div>
                 </li>
             `).join('');
+
+            const drawingListEl = document.getElementById('adminDrawingList');
+            drawingListEl.innerHTML = floors.map(f => {
+                const hasDrawing = floorDrawings[f] && floorDrawings[f].image;
+                const polygonCount = hasDrawing && floorDrawings[f].polygons ? floorDrawings[f].polygons.length : 0;
+                return `
+                    <div style="background: white; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                        <strong>${f}</strong>: ${hasDrawing ? `<span style="color:green; font-size:12px;">[도면 등록됨 (구역: ${polygonCount}개)]</span>` : '<span style="color:#999; font-size:12px;">[미등록]</span>'}
+                        <div style="display: flex; gap: 6px; margin-top: 6px;">
+                            <input type="file" accept="image/*" onchange="uploadDrawing('${f}', this)" style="margin-bottom:0; padding:6px; font-size:13px; flex:1;">
+                            ${hasDrawing ? `
+                                <button type="button" class="edit-btn" onclick="openPolygonEditor('${f}')" style="width:auto !important;">구역 편집</button>
+                                <button type="button" class="delete-btn" onclick="deleteDrawing('${f}')" style="width:auto !important;">삭제</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             setupDragAndDrop();
         };
@@ -655,7 +972,7 @@
             });
 
             if (myCount === 0) {
-                myRecordList.innerHTML = `${selectedDate} 등록 내역이 없습니다.`;
+                myRecordList.innerHTML = `${selectedDate} 자로 내가 등록한 내역이 없습니다.`;
             }
         };
 
@@ -816,7 +1133,7 @@
             const worksheet = XLSX.utils.json_to_sheet(excelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "청주_PT7_4공구_물량");
-            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(우측상단확장최종).xlsx");
+            XLSX.writeFile(workbook, "중원엔지니어링_작업물량_관리(최종완성버전).xlsx");
         };
     </script>
 </body>
